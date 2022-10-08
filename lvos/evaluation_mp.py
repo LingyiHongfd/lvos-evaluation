@@ -18,17 +18,17 @@ import tracemalloc
 
 
 class LVOSEvaluation(object):
-    def __init__(self, llvos_root, task, gt_set, mp_procs=2, codalab=False):
+    def __init__(self, lvos_root, task, gt_set, mp_procs=2, codalab=False):
         """
         Class to evaluate LVOS sequences from a certain set and for a certain task
-        :param llvos_root: Path to the LVOS folder that contains JPEGImages, Annotations, etc. folders.
+        :param lvos_root: Path to the LVOS folder that contains JPEGImages, Annotations, etc. folders.
         :param task: Task to compute the evaluation, chose between semi-supervised or unsupervised.
         :param gt_set: Set to compute the evaluation
         :param sequences: Sequences to consider for the evaluation, 'all' to use all the sequences in a set.
         """
-        self.llvos_root = llvos_root
+        self.lvos_root = lvos_root
         self.task = task
-        self.dataset = LVOS(root=llvos_root, task=task, subset=gt_set, codalab=codalab)
+        self.dataset = LVOS(root=lvos_root, task=task, subset=gt_set, codalab=codalab)
         self.pbar = tqdm(total=len(list(self.dataset.get_sequences())))
         self.pbar.set_description('Eval Long-Term VOS')
         self.mp_procs=mp_procs

@@ -13,17 +13,17 @@ from scipy.optimize import linear_sum_assignment
 
 
 class LVOSEvaluation(object):
-    def __init__(self, llvos_root, task, gt_set, codalab=False):
+    def __init__(self, lvos_root, task, gt_set, codalab=False):
         """
         Class to evaluate LVOS sequences from a certain set and for a certain task
-        :param llvos_root: Path to the LVOS folder that contains JPEGImages, Annotations, etc. folders.
+        :param lvos_root: Path to the LVOS folder that contains JPEGImages, Annotations, etc. folders.
         :param task: Task to compute the evaluation, chose between semi-supervised or unsupervised.
         :param gt_set: Set to compute the evaluation
         :param sequences: Sequences to consider for the evaluation, 'all' to use all the sequences in a set.
         """
-        self.llvos_root = llvos_root
+        self.lvos_root = lvos_root
         self.task = task
-        self.dataset = LVOS(root=llvos_root, task=task, subset=gt_set, codalab=codalab)
+        self.dataset = LVOS(root=lvos_root, task=task, subset=gt_set, codalab=codalab)
 
     def _evaluate_semisupervised(self,seq,results, all_void_masks, metric):
         seq_name=list(seq.keys())[0]
