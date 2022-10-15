@@ -1,6 +1,8 @@
 import sys
-from tqdm import tqdm
 import warnings
+
+from tqdm import tqdm
+
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 from multiprocessing import Pool,Manager
 from progressbar import progressbar

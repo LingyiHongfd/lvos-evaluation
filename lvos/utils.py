@@ -1,15 +1,10 @@
-import os
 import errno
 import math
-import numpy as np
-from PIL import Image
+import os
 import warnings
 
-
-
-
-
-
+import numpy as np
+from PIL import Image
 
 
 def db_statistics(per_frame_values):

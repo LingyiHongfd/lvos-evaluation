@@ -1,9 +1,9 @@
 import imp
 import math
-import numpy as np
-import cv2
-from skimage.morphology import disk
 
+import cv2
+import numpy as np
+from skimage.morphology import disk
 
 
 def db_eval_iou(annotation, segmentation, void_pixels=None):

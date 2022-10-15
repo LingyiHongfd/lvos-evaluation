@@ -1,9 +1,10 @@
+import json
 import os
-from glob import glob
 from collections import defaultdict
+from glob import glob
+
 import numpy as np
 from PIL import Image
-import json
 
 
 class LVOS(object):
