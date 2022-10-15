@@ -1,14 +1,15 @@
 #!/usr/bin/env python
-from ast import arg
+import argparse
 import os
 import sys
+from ast import arg
 from time import time
-import argparse
 
 import numpy as np
 import pandas as pd
-from lvos.evaluation_mp import LVOSEvaluation as LVOSEvaluation_MP
+
 from lvos.evaluation import LVOSEvaluation as LVOSEvaluation_SP
+from lvos.evaluation_mp import LVOSEvaluation as LVOSEvaluation_MP
 
 default_lvos_path = None
 

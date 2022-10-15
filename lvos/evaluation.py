@@ -1,6 +1,8 @@
 import sys
-from tqdm import tqdm
 import warnings
+
+from tqdm import tqdm
+
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 
 
