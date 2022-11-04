@@ -10,7 +10,7 @@ from PIL import Image
 class LVOS(object):
     SUBSET_OPTIONS = ['val', 'test']
     TASKS = ['semi-supervised',]
-    DATASET_WEB = 'https://davischallenge.org/davis2017/code.html'
+    DATASET_WEB = 'https://lingyihongfd.github.io/lvos.github.io/'
     VOID_LABEL = 255
 
     def __init__(self, root, task='semi-supervised', subset='val', codalab=False):

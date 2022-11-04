@@ -33,11 +33,6 @@ def db_statistics(per_frame_values):
         warnings.simplefilter("ignore", category=RuntimeWarning)
         D = np.nanmean(D_bins[0]) - np.nanmean(D_bins[3])
 
-    
-    #value_len=per_frame_values.shape[1]
-    #var=(M-per_frame_values)
-    #V=np.nansum((var**2))/value_len
-    
 
 
     return M, O, D
