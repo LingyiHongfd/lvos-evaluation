@@ -39,6 +39,10 @@ For some reason, the result of DDMemory is unavailable temporarily. So we provid
 python evaluation_method.py --task semi-supervised --results_path results/semi-supervised/aott
 ```
 
+## Acknowledgement
+
+The codes are modified from <a href="https://github.com/davisvideochallenge/davis2017-evaluation"> DAVIS 2017 Semi-supervised and Unsupervised evaluation package</a>.
+
 ## Citation
 
 Please cite both papers in your publications if LVOS or this code helps your research.
