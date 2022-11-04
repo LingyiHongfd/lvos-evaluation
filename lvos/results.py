@@ -1,7 +1,8 @@
 import os
+import sys
+
 import numpy as np
 from PIL import Image
-import sys
 
 
 class Results(object):
