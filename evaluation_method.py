@@ -50,18 +50,22 @@ else:
     print(f'Evaluating sequences for the {args.task} task...')
     # Create dataset and evaluate
     if args.mp_nums<=1:
-        dataset_eval = LVOSEvaluation(lvos_root=args.lvos_path, task=args.task, gt_set=args.set)
+        dataset_eval = LVOSEvaluation(llvos_root=args.lvos_path, task=args.task, gt_set=args.set)
     else:
-        dataset_eval = LVOSEvaluation(lvos_root=args.lvos_path, task=args.task, gt_set=args.set, mp_procs=args.mp_nums)
+        dataset_eval = LVOSEvaluation(llvos_root=args.lvos_path, task=args.task, gt_set=args.set, mp_procs=args.mp_nums)
 
-    metrics_res = dataset_eval.evaluate(args.results_path)
+    metrics_res,metrics_res_seen,metrics_res_unseen = dataset_eval.evaluate(args.results_path)
     J, F ,V = metrics_res['J'], metrics_res['F'], metrics_res['V']
+    J_seen, F_seen ,V_seen = metrics_res_seen['J'], metrics_res_seen['F'], metrics_res_seen['V']
+    J_unseen, F_unseen ,V_unseen = metrics_res_unseen['J'], metrics_res_unseen['F'], metrics_res_unseen['V']
 
     # Generate dataframe for the general results
-    g_measures = ['J&F-Mean', 'J-Mean', 'J-Recall', 'J-Decay', 'F-Mean', 'F-Recall', 'F-Decay', 'V_Mean']
-    final_mean = (np.mean(J["M"]) + np.mean(F["M"])) / 2.
-    g_res = np.array([final_mean, np.mean(J["M"]), np.mean(J["R"]), np.mean(J["D"]), np.mean(F["M"]), np.mean(F["R"]),
-                      np.mean(F["D"]), np.mean(V["M"])])
+    g_measures = ['J&F-Mean','J-Mean', 'J-seen-Mean', 'J-unseen-Mean', 'F-Mean','F-seen-Mean', 'F-unseen-Mean', 'V-Mean',  'V-seen-Mean',  'V-unseen-Mean']
+    #final_mean = (np.mean(J["M"]) + np.mean(F["M"])) / 2.
+    final_mean = ((np.mean(J_seen["M"]) + np.mean(F_seen["M"])) + (np.mean(J_unseen["M"]) + np.mean(F_unseen["M"])))/ 2.
+
+    g_res = np.array([final_mean, np.mean(J["M"]), np.mean(J_seen["M"]), np.mean(J_unseen["M"]), np.mean(F["M"]), np.mean(F_seen["M"]),
+                      np.mean(F_unseen["M"]), np.mean(V["M"]), np.mean(V_seen["M"]), np.mean(V_unseen["M"])])
     g_res = np.reshape(g_res, [1, len(g_res)])
     table_g = pd.DataFrame(data=g_res, columns=g_measures)
     with open(csv_name_global_path, 'w') as f:

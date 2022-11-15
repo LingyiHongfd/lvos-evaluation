@@ -7,6 +7,8 @@ warnings.filterwarnings("ignore", category=RuntimeWarning)
 from multiprocessing import Pool,Manager
 from progressbar import progressbar
 from concurrent.futures import ThreadPoolExecutor
+import os
+
 
 
 import numpy as np
@@ -34,6 +36,16 @@ class LVOSEvaluation(object):
         self.pbar = tqdm(total=len(list(self.dataset.get_sequences())))
         self.pbar.set_description('Eval Long-Term VOS')
         self.mp_procs=mp_procs
+
+        sys.path.append(".")
+        if codalab:
+            self.unseen_videos=os.path.join(lvos_root,'unseen_videos.txt')
+        else:
+            self.unseen_videos='./unseen_videos.txt'
+
+        self.unseen_videos=open(self.unseen_videos,mode='r').readlines()
+        for vi in range(len(self.unseen_videos)):
+            self.unseen_videos[vi]=self.unseen_videos[vi].strip()
 
 
     def _evaluate_semisupervised(self,seq,results, all_void_masks, metric):

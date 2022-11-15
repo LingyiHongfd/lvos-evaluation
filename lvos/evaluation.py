@@ -2,6 +2,7 @@ import sys
 import warnings
 
 from tqdm import tqdm
+import os
 
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 
@@ -26,6 +27,16 @@ class LVOSEvaluation(object):
         self.lvos_root = lvos_root
         self.task = task
         self.dataset = LVOS(root=lvos_root, task=task, subset=gt_set, codalab=codalab)
+
+        sys.path.append(".")
+        if codalab:
+            self.unseen_videos=os.path.join(lvos_root,'unseen_videos.txt')
+        else:
+            self.unseen_videos='./unseen_videos.txt'
+
+        self.unseen_videos=open(self.unseen_videos,mode='r').readlines()
+        for vi in range(len(self.unseen_videos)):
+            self.unseen_videos[vi]=self.unseen_videos[vi].strip()
 
     def _evaluate_semisupervised(self,seq,results, all_void_masks, metric):
         seq_name=list(seq.keys())[0]
