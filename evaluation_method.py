@@ -64,8 +64,8 @@ else:
     #final_mean = (np.mean(J["M"]) + np.mean(F["M"])) / 2.
     final_mean = ((np.mean(J_seen["M"]) + np.mean(F_seen["M"])) + (np.mean(J_unseen["M"]) + np.mean(F_unseen["M"])))/ 2.
 
-    g_res = np.array([final_mean, np.mean(J["M"]), np.mean(J_seen["M"]), np.mean(J_unseen["M"]), np.mean(F["M"]), np.mean(F_seen["M"]),
-                      np.mean(F_unseen["M"]), np.mean(V["M"]), np.mean(V_seen["M"]), np.mean(V_unseen["M"])])
+    g_res = np.array([final_mean, (np.mean(J_seen["M"])+np.mean(J_unseen["M"]))/2, np.mean(J_seen["M"]), np.mean(J_unseen["M"]), (np.mean(F_seen["M"])+np.mean(F_unseen["M"]))/2, np.mean(F_seen["M"]),
+                      np.mean(F_unseen["M"]), (np.mean(V_seen["M"])+np.mean(V_unseen["M"]))/2, np.mean(V_seen["M"]), np.mean(V_unseen["M"])])
     g_res = np.reshape(g_res, [1, len(g_res)])
     table_g = pd.DataFrame(data=g_res, columns=g_measures)
     with open(csv_name_global_path, 'w') as f:
