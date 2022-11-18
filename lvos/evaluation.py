@@ -80,12 +80,20 @@ class LVOSEvaluation(object):
 
         # Containers
         metrics_res = {}
+        metrics_res_seen = {}
+        metrics_res_unseen = {}
         if 'J' in metric:
             metrics_res['J'] = {"M": [], "R": [], "D": [], "M_per_object": {}}
+            metrics_res_seen['J'] = {"M": [], "R": [], "D": [], "M_per_object": {}}
+            metrics_res_unseen['J'] = {"M": [], "R": [], "D": [], "M_per_object": {}}
         if 'F' in metric:
             metrics_res['F'] = {"M": [], "R": [], "D": [], "M_per_object": {}}
+            metrics_res_seen['F'] = {"M": [], "R": [], "D": [], "M_per_object": {}}
+            metrics_res_unseen['F'] = {"M": [], "R": [], "D": [], "M_per_object": {}}
         if 'V' in metric:
             metrics_res['V'] = {"M": [], "M_per_object": {}}
+            metrics_res_seen['V'] = {"M": [], "M_per_object": {}}
+            metrics_res_unseen['V'] = {"M": [], "M_per_object": {}}
 
         # Sweep all sequences
         results = Results(root_dir=res_path)
@@ -96,6 +104,9 @@ class LVOSEvaluation(object):
 
             _seq_name=list(seq.keys())[0]
             objs=list(seq[_seq_name])
+            is_unseen=False
+            if _seq_name in self.unseen_videos:
+                is_unseen=True
             if self.task == 'semi-supervised':
                 j_metrics_res, f_metrics_res = self._evaluate_semisupervised(seq,results, None, metric)
             for ii in range(len(objs)):
@@ -103,21 +114,56 @@ class LVOSEvaluation(object):
                 seq_name = f'{_seq_name}_{ii+1}'
                 if 'J' in metric:
                     [JM, JR, JD] = utils.db_statistics(j_metrics_res[str(_obj)])
-                    #print ('J',JM, JR, JD)
                     metrics_res['J']["M"].append(JM)
                     metrics_res['J']["R"].append(JR)
                     metrics_res['J']["D"].append(JD)
                     metrics_res['J']["M_per_object"][seq_name] = JM
+                    if is_unseen:
+                        metrics_res_unseen['J']["M"].append(JM)
+                        metrics_res_unseen['J']["R"].append(JR)
+                        metrics_res_unseen['J']["D"].append(JD)
+
+                        metrics_res_unseen['J']["M_per_object"][seq_name] = JM
+
+                    else:
+                        metrics_res_seen['J']["M"].append(JM)
+                        metrics_res_seen['J']["R"].append(JR)
+                        metrics_res_seen['J']["D"].append(JD)
+
+                        metrics_res_seen['J']["M_per_object"][seq_name] = JM
                 if 'F' in metric:
                     [FM, FR, FD] = utils.db_statistics(f_metrics_res[str(_obj)])
                     metrics_res['F']["M"].append(FM)
                     metrics_res['F']["R"].append(FR)
                     metrics_res['F']["D"].append(FD)
                     metrics_res['F']["M_per_object"][seq_name] = FM
+                    if is_unseen:
+                        metrics_res_unseen['F']["M"].append(FM)
+                        metrics_res_unseen['F']["R"].append(FR)
+                        metrics_res_unseen['F']["D"].append(FD)
+
+                        metrics_res_unseen['F']["M_per_object"][seq_name] = FM
+
+                    else:
+                        metrics_res_seen['F']["M"].append(FM)
+                        metrics_res_seen['F']["R"].append(FR)
+                        metrics_res_seen['F']["D"].append(FD)
+
+                        metrics_res_seen['F']["M_per_object"][seq_name] = FM
+
                 if 'V' in metric and 'J' in metric and 'F' in metric: 
                     VM = utils.db_statistics_var(j_metrics_res[str(_obj)],f_metrics_res[str(_obj)])
                     metrics_res['V']['M']=VM
                     metrics_res['V']["M_per_object"][seq_name] = VM
 
+                    if is_unseen:
+                        metrics_res_unseen['V']["M"].append(VM)
+
+                        metrics_res_unseen['V']["M_per_object"][seq_name] = VM
+                    else:
+                        metrics_res_seen['V']["M"].append(VM)
+                        
+                        metrics_res_seen['V']["M_per_object"][seq_name] = VM
+
             
-        return metrics_res
+        return metrics_res,metrics_res_seen,metrics_res_unseen
