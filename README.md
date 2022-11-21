@@ -2,7 +2,7 @@
 
 This package is used to evaluate semi-supervised long-term video multi-object segmentation models for the <a href="https://lingyihongfd.github.io/lvos.github.io/" target="_blank">LVOS</a> dataset.
 
-This tool is also used to evaluate the submissions in the Codalab site for the <a href="https://competitions.codalab.org/competitions/20516" target="_blank">Semi-supervised LVOS Challenge</a>.
+This tool is also used to evaluate the submissions in the Codalab site for the <a href="https://codalab.lisn.upsaclay.fr/competitions/8767" target="_blank">Semi-supervised LVOS Challenge</a>.
 
 ### Installation
 
