@@ -17,7 +17,7 @@ If you don't want to specify the LVOS path every time, you can modify the defaul
 
 Note: `default_lvos_path` is the valid split path.
 
-Otherwise, you can specify the path in every call using using the flag `--lvos_path /path/to/LVOS` when calling `evaluation_method.py`.
+Otherwise, you can specify the path in every call by using the flag `--lvos_path /path/to/LVOS` when calling `evaluation_method.py`.
 
 Once the evaluation has finished, two different CSV files will be generated inside the folder with the results:
 
