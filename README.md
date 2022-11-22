@@ -53,10 +53,10 @@ The codes are modified from <a href="https://github.com/davisvideochallenge/davi
 Please cite both papers in your publications if LVOS or this code helps your research.
 
 ```latex
-@article{Caelles_arXiv_2019,
-  author = {Sergi Caelles and Jordi Pont-Tuset and Federico Perazzi and Alberto Montes and Kevis-Kokitsi Maninis and Luc {Van Gool}},
-  title = {The 2019 DAVIS Challenge on VOS: Unsupervised Multi-Object Segmentation},
-  journal = {arXiv},
-  year = {2019}
+@article{hong2022lvos,
+    title={LVOS: A Benchmark for Long-term Video Object Segmentation},
+    author={Hong, Lingyi and Chen, Wenchao and Liu, Zhongying and Zhang, Wei and Guo, Pinxue and Chen, Zhaoyu and Zhang, Wenqiang},
+    journal={arXiv preprint arXiv:2211.10181},
+    year={2022},
 }
 ```
