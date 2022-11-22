@@ -14,7 +14,9 @@ python setup.py install
 ```
 
 If you don't want to specify the LVOS path every time, you can modify the default value in the variable `default_lvos_path` in `evaluation_method.py`(the following examples assume that you have set it).
+
 Note: `default_lvos_path` is the valid split path.
+
 Otherwise, you can specify the path in every call using using the flag `--lvos_path /path/to/LVOS` when calling `evaluation_method.py`.
 
 Once the evaluation has finished, two different CSV files will be generated inside the folder with the results:
