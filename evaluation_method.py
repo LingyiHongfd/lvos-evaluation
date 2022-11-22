@@ -18,7 +18,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--lvos_path', type=str, help='Path to the LVOS folder containing the JPEGImages, Annotations, '
                                                    'ImageSets, Annotations_unsupervised folders',
                     required=False, default=default_lvos_path)
-parser.add_argument('--set', type=str, help='Subset to evaluate the results', default='val')
+parser.add_argument('--set', type=str, help='Subset to evaluate the results', default='valid')
 parser.add_argument('--mp_nums', type=int, default=1, help='Multiple process numbers',)
 
 parser.add_argument('--task', type=str, help='Task to evaluate the results', default='semi-supervised',)
@@ -50,9 +50,9 @@ else:
     print(f'Evaluating sequences for the {args.task} task...')
     # Create dataset and evaluate
     if args.mp_nums<=1:
-        dataset_eval = LVOSEvaluation(llvos_root=args.lvos_path, task=args.task, gt_set=args.set)
+        dataset_eval = LVOSEvaluation(lvos_root=args.lvos_path, task=args.task, gt_set=args.set)
     else:
-        dataset_eval = LVOSEvaluation(llvos_root=args.lvos_path, task=args.task, gt_set=args.set, mp_procs=args.mp_nums)
+        dataset_eval = LVOSEvaluation(lvos_root=args.lvos_path, task=args.task, gt_set=args.set, mp_procs=args.mp_nums)
 
     metrics_res,metrics_res_seen,metrics_res_unseen = dataset_eval.evaluate(args.results_path)
     J, F ,V = metrics_res['J'], metrics_res['F'], metrics_res['V']

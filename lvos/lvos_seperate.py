@@ -38,7 +38,9 @@ class LVOS(object):
         annotations_folder = 'Annotations' if task == 'semi-supervised' else 'Annotations_unsupervised'
         self.mask_path = os.path.join(self.root,annotations_folder)
 
-        json_path=os.path.join(root,'meta.json')
+        json_path=os.path.join(root,self.subset+'_meta.json')
+            
+
         with open(json_path,'r') as f:
             self.json_data=json.load(f)
         self.json_data=self.json_data['videos']
