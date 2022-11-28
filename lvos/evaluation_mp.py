@@ -94,6 +94,9 @@ class LVOSEvaluation(object):
         for ii in range(len(objs)):
             _obj=objs[ii]
             seq_name = f'{_seq_name}_{ii+1}'
+            is_unseen=False
+            if _seq_name in self.unseen_videos:
+                is_unseen=True
             if 'J' in self.metric:
                 [JM, JR, JD] = utils.db_statistics(j_metrics_res[str(_obj)])
                 #print ('J',JM, JR, JD)
@@ -103,6 +106,20 @@ class LVOSEvaluation(object):
 
                 self.metrics_res['J']["M_per_object"][seq_name] = JM
 
+                if is_unseen:
+                    self.pmetrics_res_unseen['J']["M"].append(JM)
+                    self.pmetrics_res_unseen['J']["R"].append(JR)
+                    self.pmetrics_res_unseen['J']["D"].append(JD)
+
+                    self.pmetrics_res_unseen['J']["M_per_object"][seq_name] = JM
+
+                else:
+                    self.pmetrics_res_seen['J']["M"].append(JM)
+                    self.pmetrics_res_seen['J']["R"].append(JR)
+                    self.pmetrics_res_seen['J']["D"].append(JD)
+
+                    self.pmetrics_res_seen['J']["M_per_object"][seq_name] = JM
+
             if 'F' in self.metric:
                 [FM, FR, FD] = utils.db_statistics(f_metrics_res[str(_obj)])
                 self.metrics_res['F']["M"].append(FM)
@@ -110,14 +127,34 @@ class LVOSEvaluation(object):
                 self.metrics_res['F']["D"].append(FD)
 
                 self.metrics_res['F']["M_per_object"][seq_name] = FM
+
+                if is_unseen:
+                    self.pmetrics_res_unseen['F']["M"].append(FM)
+                    self.pmetrics_res_unseen['F']["R"].append(FR)
+                    self.pmetrics_res_unseen['F']["D"].append(FD)
+
+                    self.pmetrics_res_unseen['F']["M_per_object"][seq_name] = FM
+
+                else:
+                    self.pmetrics_res_seen['F']["M"].append(FM)
+                    self.pmetrics_res_seen['F']["R"].append(FR)
+                    self.pmetrics_res_seen['F']["D"].append(FD)
+
+                    self.pmetrics_res_seen['F']["M_per_object"][seq_name] = FM
+
             if 'V' in self.metric and 'J' in self.metric and 'F' in self.metric: 
                 VM = utils.db_statistics_var(j_metrics_res[str(_obj)],f_metrics_res[str(_obj)])
                 self.metrics_res['V']['M']=VM
                 self.metrics_res['V']["M_per_object"][seq_name] = VM
-                #print ('var',VM)
-            
 
-        #print (self.metrics_res)
+
+                if is_unseen:
+                    self.pmetrics_res_unseen['V']["M"].append(VM)
+                    self.pmetrics_res_unseen['V']["M_per_object"][seq_name] = VM
+                else:
+                    self.pmetrics_res_seen['V']["M"].append(VM)
+                    self.pmetrics_res_unseen['V']["M_per_object"][seq_name] = VM            
+
         self.pbar.update()
 
 
@@ -162,15 +199,23 @@ class LVOSEvaluation(object):
         # Containers
         self.metrics_res = dict()
         self.pmetrics_res = dict()
+        self.pmetrics_res_seen = dict()
+        self.pmetrics_res_unseen = dict()
         if 'J' in metric:
             self.metrics_res['J'] = {"M": [], "R": [], "D": [],"M_per_object": {}}
             self.pmetrics_res['J'] = {"M": [], "R": [], "D": [],"M_per_object": {}}
+            self.pmetrics_res_seen['J'] = {"M": [], "R": [], "D": [],"M_per_object": {}}
+            self.pmetrics_res_unseen['J'] = {"M": [], "R": [], "D": [],"M_per_object": {}}
         if 'F' in metric:
             self.metrics_res['F'] = {"M": [], "R": [], "D": [], "M_per_object": {}}
             self.pmetrics_res['F'] = {"M": [], "R": [], "D": [], "M_per_object": {}}
+            self.pmetrics_res_seen['F'] = {"M": [], "R": [], "D": [], "M_per_object": {}}
+            self.pmetrics_res_unseen['F'] = {"M": [], "R": [], "D": [], "M_per_object": {}}
         if 'V' in metric:
             self.metrics_res['V'] = {"M": [], "M_per_object": {}}
             self.pmetrics_res['V'] = {"M": [],  "M_per_object": {}}
+            self.pmetrics_res_seen['V'] = {"M": [],  "M_per_object": {}}
+            self.pmetrics_res_unseen['V'] = {"M": [],  "M_per_object": {}}
         
         
         # Sweep all sequences
@@ -183,4 +228,4 @@ class LVOSEvaluation(object):
             
         
         self.adjust()
-        return self.pmetrics_res
+        return self.pmetrics_res,self.pmetrics_res_seen,self.pmetrics_res_unseen

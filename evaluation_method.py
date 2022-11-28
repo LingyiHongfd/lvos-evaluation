@@ -62,7 +62,7 @@ else:
     # Generate dataframe for the general results
     g_measures = ['J&F-Mean','J-Mean', 'J-seen-Mean', 'J-unseen-Mean', 'F-Mean','F-seen-Mean', 'F-unseen-Mean', 'V-Mean',  'V-seen-Mean',  'V-unseen-Mean']
     #final_mean = (np.mean(J["M"]) + np.mean(F["M"])) / 2.
-    final_mean = ((np.mean(J_seen["M"]) + np.mean(F_seen["M"])) + (np.mean(J_unseen["M"]) + np.mean(F_unseen["M"])))/ 2.
+    final_mean = ((np.mean(J_seen["M"]) + np.mean(F_seen["M"])) + (np.mean(J_unseen["M"]) + np.mean(F_unseen["M"])))/ 4.
 
     g_res = np.array([final_mean, (np.mean(J_seen["M"])+np.mean(J_unseen["M"]))/2, np.mean(J_seen["M"]), np.mean(J_unseen["M"]), (np.mean(F_seen["M"])+np.mean(F_unseen["M"]))/2, np.mean(F_seen["M"]),
                       np.mean(F_unseen["M"]), (np.mean(V_seen["M"])+np.mean(V_unseen["M"]))/2, np.mean(V_seen["M"]), np.mean(V_unseen["M"])])

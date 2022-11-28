@@ -8,7 +8,7 @@ from PIL import Image
 
 
 class LVOS(object):
-    SUBSET_OPTIONS = ['val', 'test']
+    SUBSET_OPTIONS = ['valid', 'test']
     TASKS = ['semi-supervised',]
     DATASET_WEB = 'https://lingyihongfd.github.io/lvos.github.io/'
     VOID_LABEL = 255
