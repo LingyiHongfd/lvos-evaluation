@@ -42,7 +42,11 @@ For some reason, the result of DDMemory is unavailable temporarily. So we provid
 python evaluation_method.py --task semi-supervised --results_path results/semi-supervised/aott --mp_nums 1
 ```
 
-`mp_nums` is set as 1 by default. Because the score computing process in serial mode is time-consuming, you can set `mp_nums` larger than 1 (such as 2) to enable multiple processing and speed up the evaluation. But we suggest that `mp_nums` should be set to less than 8 on a regular server.   
+`mp_nums` is set as 1 by default. Because the score computing process in serial mode is time-consuming, you can set `mp_nums` larger than 1 (such as 2) to enable multiple processing and speed up the evaluation. But we suggest that `mp_nums` should be set to less than 8 on a regular server.  
+
+## APIs
+
+We released the tools and test scripts in this <a href="https://github.com/LingyiHongfd/LVOS-api"> repository</a>. Click on this link for more information.
 
 ## Acknowledgement
 
