@@ -23,12 +23,12 @@ class Results(object):
 
     def read_masks(self, sequence, masks_id):
         mask_0 = self._read_mask(sequence, masks_id[0])
-        masks = np.zeros((len(masks_id), *mask_0.shape))
+        masks = np.zeros((len(masks_id), *mask_0.shape), dtype=mask_0.dtype)
         for ii, m in enumerate(masks_id):
             masks[ii, ...] = self._read_mask(sequence, m)
         num_objects = int(np.max(masks))
-        tmp = np.ones((num_objects, *masks.shape))
-        tmp = tmp * np.arange(1, num_objects + 1)[:, None, None, None]
+        tmp = np.ones((num_objects, *masks.shape), dtype=masks.dtype)
+        tmp = tmp * np.arange(1, num_objects + 1, dtype=tmp.dtype)[:, None, None, None]
         masks = (tmp == masks[None, ...]) > 0
         return masks
 

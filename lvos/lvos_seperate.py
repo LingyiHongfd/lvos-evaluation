@@ -72,7 +72,7 @@ class LVOS(object):
 
     def _get_all_elements(self, sequence, obj_type):
         obj = np.array(Image.open(self.sequences[sequence][obj_type][0]))
-        all_objs = np.zeros((len(self.sequences[sequence][obj_type]), *obj.shape))
+        all_objs = np.zeros((len(self.sequences[sequence][obj_type]), *obj.shape), dtype=np.uint8)
         obj_id = []
         for i, obj in enumerate(self.sequences[sequence][obj_type]):
             all_objs[i, ...] = np.array(Image.open(obj))
@@ -93,8 +93,8 @@ class LVOS(object):
 
         if separate_objects_masks:
             num_objects = int(np.max(masks[0, ...]))
-            tmp = np.ones((num_objects, *masks.shape))
-            tmp = tmp * np.arange(1, num_objects + 1)[:, None, None, None]
+            tmp = np.ones((num_objects, *masks.shape), dtype=masks.dtype)
+            tmp = tmp * np.arange(1, num_objects + 1, dtype=tmp.dtype)[:, None, None, None]
             masks = (tmp == masks[None, ...])
             masks = masks > 0
         return masks, masks_void, masks_id
