@@ -26,23 +26,40 @@ Once the evaluation has finished, two different CSV files will be generated insi
 
 If a folder that contains the previous files is evaluated again, the results will be read from the CSV files instead of recomputing them.
 
-## Evaluate LVOS Semi-supervised
+## Evaluate Your VOS Model on LVOS
 
-In order to evaluate your semi-supervised method in LVOS, execute the following command substituting `results/semi-supervised/ddmemory` by the folder path that contains your results:
-
-```bash
-python evaluation_method.py --task semi-supervised --results_path results/semi-supervised/ddmemory --mp_nums 1
-```
-
-The semi-supervised results have been generated using DDMemory.
-
-For some reason, the result of DDMemory is unavailable temporarily. So we provide the result of <a href="https://github.com/yoxu515/aot-benchmark" target="_blank"> AOT-T </a> as an alternative. You can download the result <a href="https://drive.google.com/drive/folders/1bGbyNUdbvmQBBezVv_3Fp-5LITMsY2EG?usp=share_link" target="_blank"> here </a> and unzip the file. After putting the unziped file under the folder `results/semi-supervised/aott`, please use the following command to evaluate AOT-T result.
+In order to evaluate your vos method on LVOS , execute the following command substituting `results_path` by the folder path that contains your results:
 
 ```bash
-python evaluation_method.py --task semi-supervised --results_path results/semi-supervised/aott --mp_nums 1
+python evaluation_method.py --task semi-supervised --results_path results_path --mp_nums 1
 ```
 
-`mp_nums` is set as 1 by default. Because the score computing process in serial mode is time-consuming, you can set `mp_nums` larger than 1 (such as 2) to enable multiple processing and speed up the evaluation. But we suggest that `mp_nums` should be set to less than 8 on a regular server.  
+<!-- For some reason, the result of DDMemory is unavailable temporarily. So we provide the result of <a href="https://github.com/yoxu515/aot-benchmark" target="_blank"> AOT-T </a> as an alternative. You can download the result <a href="https://drive.google.com/drive/folders/1bGbyNUdbvmQBBezVv_3Fp-5LITMsY2EG?usp=share_link" target="_blank"> here </a> and unzip the file. After putting the unziped file under the folder `results/semi-supervised/aott`, please use the following command to evaluate AOT-T result. -->
+
+`mp_nums` is set as 1 by default. Because the score computing process in serial mode is time-consuming, you can set `mp_nums` larger than 1 (such as 2) to enable multiple processing and speed up the evaluation. But we suggest that `mp_nums` should be set to less than 8 on a regular server.
+
+Besides, you can also choose to use multiple process or multiple thread to speed up the evaluation process by set `m_class`. 
+
+To accelerate the evaluation, we also introduce the cache technique and the Cython code. Setting `use_cache` as `True`, our code will automatically cache the intermediate results and uses the cached results in subsequent evaluations to reduce redundant computation. It's worth noting that the cache data requires 1G disk space. Moreover, you can compile the ops to further speed up the evaluation. 
+
+```bash
+cd ./lvos/metric_ops/_get_binary_c
+python setup.py build_ext --inplace
+```
+
+In addition to the semi-supervised vos task, we also support unsupervised vos tasks. You can set `task` as `unsupervised_multiple` or `unsupervised_single`.
+
+Here is an example to evaluate the semi-supervised vos model with 64 processes.
+
+```bash
+python evaluation_method.py --task semi-supervised --results_path results_path --mp_nums 64 --m_class mp --use_cache
+```
+
+Our code can be used to evaluate both LVOS V1 and LVOS V2 by setting `lvos_path`.
+
+
+
+
 
 ## APIs
 
@@ -57,10 +74,19 @@ The codes are modified from <a href="https://github.com/davisvideochallenge/davi
 Please cite both papers in your publications if LVOS or this code helps your research.
 
 ```latex
-@article{hong2022lvos,
-    title={LVOS: A Benchmark for Long-term Video Object Segmentation},
-    author={Hong, Lingyi and Chen, Wenchao and Liu, Zhongying and Zhang, Wei and Guo, Pinxue and Chen, Zhaoyu and Zhang, Wenqiang},
-    journal={arXiv preprint arXiv:2211.10181},
-    year={2022},
+# for LVOS V2
+@article{hong2024lvos,
+  title={LVOS: A Benchmark for Large-scale Long-term Video Object Segmentation},
+  author={Hong, Lingyi and Liu, Zhongying and Chen, Wenchao and Tan, Chenzhi and Feng, Yuang and Zhou, Xinyu and Guo, Pinxue and Li, Jinglun and Chen, Zhaoyu and Gao, Shuyong and others},
+  journal={arXiv preprint arXiv:2404.19326},
+  year={2024}
+}
+# for LVOS V1
+@inproceedings{hong2023lvos,
+  title={Lvos: A benchmark for long-term video object segmentation},
+  author={Hong, Lingyi and Chen, Wenchao and Liu, Zhongying and Zhang, Wei and Guo, Pinxue and Chen, Zhaoyu and Zhang, Wenqiang},
+  booktitle={Proceedings of the IEEE/CVF International Conference on Computer Vision},
+  pages={13480--13492},
+  year={2023}
 }
 ```
