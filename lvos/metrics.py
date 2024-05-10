@@ -1,13 +1,31 @@
-import imp
 import math
 
+import os
 import cv2
 import numpy as np
 from skimage.morphology import disk
+import time
+from PIL import Image
+
+
+try:
+    from .metric_ops._get_binary_c import _get_binary_c
+
+    print("Succeed to import _get_binary_c, using Cython version.")
+    use_cython = True
+except ImportError:
+    print("Failed to import _get_binary_c, using Python version.")
+    print(
+        "Please see README for more information. If you want to use Cython version, please run `python setup.py build_ext --inplace` in `metric_ops/_get_binary_c` folder."
+    )
+    print(
+        "The Python version will be slower than Cython version, but the result is the same."
+    )
+    use_cython = False
 
 
 def db_eval_iou(annotation, segmentation, void_pixels=None):
-    """ Compute region similarity as the Jaccard Index.
+    """Compute region similarity as the Jaccard Index.
     Arguments:
         annotation   (ndarray): binary annotation   map.
         segmentation (ndarray): binary segmentation map.
@@ -16,21 +34,27 @@ def db_eval_iou(annotation, segmentation, void_pixels=None):
     Return:
         jaccard (float): region similarity
     """
-    assert annotation.shape == segmentation.shape, \
-        f'Annotation({annotation.shape}) and segmentation:{segmentation.shape} dimensions do not match.'
-    annotation = annotation.astype(np.bool)
-    segmentation = segmentation.astype(np.bool)
+    assert (
+        annotation.shape == segmentation.shape
+    ), f"Annotation({annotation.shape}) and segmentation:{segmentation.shape} dimensions do not match."
+    annotation = annotation.astype(np.bool_)
+    segmentation = segmentation.astype(np.bool_)
 
     if void_pixels is not None:
-        assert annotation.shape == void_pixels.shape, \
-            f'Annotation({annotation.shape}) and void pixels:{void_pixels.shape} dimensions do not match.'
-        void_pixels = void_pixels.astype(np.bool)
+        assert (
+            annotation.shape == void_pixels.shape
+        ), f"Annotation({annotation.shape}) and void pixels:{void_pixels.shape} dimensions do not match."
+        void_pixels = void_pixels.astype(np.bool_)
     else:
         void_pixels = np.zeros_like(segmentation)
 
     # Intersection between all sets
-    inters = np.sum((segmentation & annotation) & np.logical_not(void_pixels), axis=(-2, -1))
-    union = np.sum((segmentation | annotation) & np.logical_not(void_pixels), axis=(-2, -1))
+    inters = np.sum(
+        (segmentation & annotation) & np.logical_not(void_pixels), axis=(-2, -1)
+    )
+    union = np.sum(
+        (segmentation | annotation) & np.logical_not(void_pixels), axis=(-2, -1)
+    )
 
     j = inters / union
     if j.ndim == 0:
@@ -39,7 +63,17 @@ def db_eval_iou(annotation, segmentation, void_pixels=None):
         j[np.isclose(union, 0)] = 1
     return j
 
-def db_eval_boundary(annotation, segmentation, void_pixels=None, bound_th=0.008):
+
+def db_eval_boundary(
+    annotation,
+    segmentation,
+    void_pixels=None,
+    bound_th=0.008,
+    video_name=None,
+    frame_name=None,
+    eval_obj=None,
+    use_cache=False,
+):
     assert annotation.shape == segmentation.shape
     if void_pixels is not None:
         assert annotation.shape == void_pixels.shape
@@ -47,15 +81,57 @@ def db_eval_boundary(annotation, segmentation, void_pixels=None, bound_th=0.008)
         n_frames = annotation.shape[0]
         f_res = np.zeros(n_frames)
         for frame_id in range(n_frames):
-            void_pixels_frame = None if void_pixels is None else void_pixels[frame_id, :, :, ]
-            f_res[frame_id] = f_measure(segmentation[frame_id, :, :, ], annotation[frame_id, :, :], void_pixels_frame, bound_th=bound_th)
+            void_pixels_frame = (
+                None
+                if void_pixels is None
+                else void_pixels[
+                    frame_id,
+                    :,
+                    :,
+                ]
+            )
+            f_res[frame_id] = f_measure(
+                segmentation[
+                    frame_id,
+                    :,
+                    :,
+                ],
+                annotation[frame_id, :, :],
+                void_pixels_frame,
+                bound_th=bound_th,
+                video_name=video_name,
+                frame_name=frame_name,
+                eval_obj=eval_obj,
+                use_cache=use_cache,
+            )
     elif annotation.ndim == 2:
-        f_res = f_measure(segmentation, annotation, void_pixels, bound_th=bound_th)
+        f_res = f_measure(
+            segmentation,
+            annotation,
+            void_pixels,
+            bound_th=bound_th,
+            video_name=video_name,
+            frame_name=frame_name,
+            eval_obj=eval_obj,
+            use_cache=use_cache,
+        )
     else:
-        raise ValueError(f'db_eval_boundary does not support tensors with {annotation.ndim} dimensions')
+        raise ValueError(
+            f"db_eval_boundary does not support tensors with {annotation.ndim} dimensions"
+        )
     return f_res
 
-def f_measure(foreground_mask, gt_mask, void_pixels=None, bound_th=0.008):
+
+def f_measure(
+    foreground_mask,
+    gt_mask,
+    void_pixels=None,
+    bound_th=0.008,
+    video_name=None,
+    frame_name=None,
+    eval_obj=None,
+    use_cache=False,
+):
     """
     Compute mean,recall and decay from per-frame evaluation.
     Calculates precision/recall for boundaries between foreground_mask and
@@ -69,24 +145,47 @@ def f_measure(foreground_mask, gt_mask, void_pixels=None, bound_th=0.008):
     Returns:
         F (float): boundaries F-measure
     """
+
     assert np.atleast_3d(foreground_mask).shape[2] == 1
     if void_pixels is not None:
-        void_pixels = void_pixels.astype(np.bool)
+        void_pixels = void_pixels.astype(np.bool_)
     else:
-        void_pixels = np.zeros_like(foreground_mask).astype(np.bool)
-
-    bound_pix = bound_th if bound_th >= 1 else \
-        np.ceil(bound_th * np.linalg.norm(foreground_mask.shape))
+        void_pixels = np.zeros_like(foreground_mask).astype(np.bool_)
 
     # Get the pixel boundaries of both masks
-    fg_boundary = _seg2bmap(foreground_mask * np.logical_not(void_pixels))
-    gt_boundary = _seg2bmap(gt_mask * np.logical_not(void_pixels))
+    fg_boundary = _seg2bmap_c(
+        (foreground_mask * np.logical_not(void_pixels)).astype(np.bool_)
+    )
+    gt_boundary = _seg2bmap_c((gt_mask * np.logical_not(void_pixels)).astype(np.bool_))
 
+    # most of time
+    bound_pix = (
+        bound_th
+        if bound_th >= 1
+        else np.ceil(bound_th * np.linalg.norm(foreground_mask.shape))
+    )
 
-    # fg_dil = binary_dilation(fg_boundary, disk(bound_pix))
     fg_dil = cv2.dilate(fg_boundary.astype(np.uint8), disk(bound_pix).astype(np.uint8))
-    # gt_dil = binary_dilation(gt_boundary, disk(bound_pix))
-    gt_dil = cv2.dilate(gt_boundary.astype(np.uint8), disk(bound_pix).astype(np.uint8))
+
+    # use cache data for speed up
+    if use_cache:
+        cache_path = "./cache_data"
+        cache_data_path = os.path.join(
+            cache_path, video_name, eval_obj, frame_name + ".png"
+        )
+        if os.path.exists(cache_data_path):
+            gt_dil = np.array(Image.open(cache_data_path).convert("P"))
+        else:
+            gt_dil = cv2.dilate(
+                gt_boundary.astype(np.uint8), disk(bound_pix).astype(np.uint8)
+            )
+            os.makedirs(os.path.join(cache_path, video_name, eval_obj), exist_ok=True)
+            tmp_gt = Image.fromarray(gt_dil.astype(np.uint8)).convert("P")
+            tmp_gt.save(cache_data_path)
+    else:
+        gt_dil = cv2.dilate(
+            gt_boundary.astype(np.uint8), disk(bound_pix).astype(np.uint8)
+        )
 
     # Get the intersection
     gt_match = gt_boundary * fg_dil
@@ -134,7 +233,6 @@ def _seg2bmap(seg, width=None, height=None):
      January 2003
     """
 
-    seg = seg.astype(np.bool)
     seg[seg > 0] = 1
 
     assert np.atleast_3d(seg).shape[2] == 1
@@ -174,5 +272,48 @@ def _seg2bmap(seg, width=None, height=None):
                     j = 1 + math.floor((y - 1) + height / h)
                     i = 1 + math.floor((x - 1) + width / h)
                     bmap[j, i] = 1
+
+    return bmap
+
+
+def _seg2bmap_c(seg, width=None, height=None):
+
+    seg[seg > 0] = 1
+    assert np.atleast_3d(seg).shape[2] == 1
+
+    h, w = seg.shape[:2]
+    width = width if width is not None else w
+    height = height if height is not None else h
+
+    ar1 = float(width) / float(height)
+    ar2 = float(w) / float(h)
+    assert not (
+        width > w or height > h or abs(ar1 - ar2) > 0.01
+    ), "Can't convert %dx%d seg to %dx%d bmap." % (w, h, width, height)
+
+    e = np.zeros_like(seg)
+    s = np.zeros_like(seg)
+    se = np.zeros_like(seg)
+
+    e[:, :-1] = seg[:, 1:]
+    s[:-1, :] = seg[1:, :]
+    se[:-1, :-1] = seg[1:, 1:]
+
+    if use_cython:
+        b = _get_binary_c.compute_b(seg, e, s, se)
+    else:
+        b = seg ^ e | seg ^ s | seg ^ se
+    b[-1, :] = seg[-1, :] ^ e[-1, :]
+    b[:, -1] = seg[:, -1] ^ s[:, -1]
+    b[-1, -1] = 0
+
+    if w == width and h == height:
+        bmap = b
+    else:
+        bmap = np.zeros((height, width))
+        ys, xs = np.indices((h, w))
+        j = 1 + np.floor((ys - 1) + height / h).astype(int)
+        i = 1 + np.floor((xs - 1) + width / h).astype(int)
+        bmap[j, i] = b[ys, xs]
 
     return bmap

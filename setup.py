@@ -16,5 +16,6 @@ setup(
         'scikit-image>=0.13.1',
         'scikit-learn>=0.18',
         'scipy>=1.0.0',
-        'tqdm>=4.28.1'
+        'tqdm>=4.28.1',
+        'cython',
     ])
